@@ -221,7 +221,7 @@ if st.session_state.docs:
     
     if question and ask_button:
         with st.spinner("🤔 Thinking..."):
-            result = st.session_state.qa_chain(question)
+            result = st.session_state.qa_chain.invoke({"input": question})
             
             
             st.markdown("### 💡 Answer")
@@ -232,12 +232,12 @@ if st.session_state.docs:
                         color: white; 
                         font-size: 1.1rem;
                         line-height: 1.6;'>
-                {result["result"]}
+                {result["answer"]}
             </div>
             """, unsafe_allow_html=True)
             
             st.markdown("### 📚 Sources")
-            sources = format_sources(result["source_documents"])
+            sources = format_sources(result["context"])
             
             for i, src in enumerate(sources, 1):
                 st.markdown(f"""
