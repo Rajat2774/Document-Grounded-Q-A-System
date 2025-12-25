@@ -18,6 +18,9 @@ st.set_page_config(
 st.markdown("""
 <style>
     /* Main container styling */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     .main {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
