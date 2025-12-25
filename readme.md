@@ -1,0 +1,1 @@
+Retrieval-Augmented Generation system that allows users to query PDFs and websites. The system embeds document chunks into a vector store and retrieves relevant context at inference time to generate grounded answers with source attribution
