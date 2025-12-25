@@ -1,5 +1,5 @@
 from langchain_groq import ChatGroq
-from langchain.chains import RetrievalQA
+from langchain_community.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
 import os
