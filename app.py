@@ -4,9 +4,9 @@ from ingest.web_Ingestion import load_website
 from retrieval.retriever import create_vector_store
 from retrieval.qa_chain import build_qa_chain
 from utils import format_sources
-import re
+import os
+import shutil
 
-# Page configuration
 st.set_page_config(
     page_title="RAG Q&A System",
     page_icon="🤖",
@@ -14,7 +14,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for enhanced styling
 st.markdown("""
 <style>
     /* Main container styling */
@@ -165,7 +164,38 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Header
+# Function to clear all context
+def clear_all_context():
+    """Clear all documents, vector stores, and temporary files"""
+    st.session_state.docs = []
+    st.session_state.vector_store = None
+    st.session_state.qa_chain = None
+    st.session_state.retriever = None
+    st.session_state.current_source = None
+    st.session_state.processing_complete = False
+    st.session_state.last_processed_file = None
+    st.session_state.active_input_mode = None
+
+
+    
+    # Delete vector store directory
+    try:
+        if os.path.exists("vectorstore"):
+            shutil.rmtree("vectorstore")
+    except Exception as e:
+        print(f"Warning: Could not delete vectorstore directory: {e}")
+    
+    # Clean up any temp PDF files
+    try:
+        import glob
+        for temp_file in glob.glob("temp_*.pdf"):
+            try:
+                os.remove(temp_file)
+            except:
+                pass
+    except Exception as e:
+        print(f"Warning: Could not clean temp files: {e}")
+
 st.markdown("<h1>🤖 Intelligent Q&A System</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subtitle'>Upload documents or provide a website URL to get instant answers powered by AI</p>", unsafe_allow_html=True)
 
@@ -176,48 +206,29 @@ if 'vector_store' not in st.session_state:
     st.session_state.vector_store = None
 if 'qa_chain' not in st.session_state:
     st.session_state.qa_chain = None
+if 'retriever' not in st.session_state:
+    st.session_state.retriever = None
 if 'file_uploader_key' not in st.session_state:
     st.session_state.file_uploader_key = 0
-if 'processed_files' not in st.session_state:
-    st.session_state.processed_files = set()
+if 'current_source' not in st.session_state:
+    st.session_state.current_source = None
+if 'processing_complete' not in st.session_state:
+    st.session_state.processing_complete = False
+if 'last_processed_file' not in st.session_state:
+    st.session_state.last_processed_file = None
+if "active_input_mode" not in st.session_state:
+    st.session_state.active_input_mode = None  # "pdf" or "website"
+
 
 # Create two columns for better layout
 col1, col2 = st.columns([1, 1])
 
-with col1:
-    st.markdown("### 📤 Upload Your Content")
-    
-    # PDF Upload with unique key
-    uploaded_pdf = st.file_uploader(
-        "Upload a PDF document",
-        type=["pdf"],
-        help="Select a PDF file to analyze",
-        key=f"pdf_uploader_{st.session_state.file_uploader_key}"
-    )
-    
-    if uploaded_pdf:
-        # Create unique identifier for file
-        file_id = f"{uploaded_pdf.name}_{uploaded_pdf.size}"
-        
-        # Only process if not already processed
-        if file_id not in st.session_state.processed_files:
-            with st.spinner("📄 Processing PDF..."):
-                with open("temp.pdf", "wb") as f:
-                    f.write(uploaded_pdf.read())
-                new_docs = load_pdf("temp.pdf")
-                st.session_state.docs.extend(new_docs)
-                st.session_state.processed_files.add(file_id)
-                # Reset vector store to force rebuild
-                st.session_state.vector_store = None
-                st.session_state.qa_chain = None
-                st.markdown(f"<div class='success-msg'>✅ Successfully loaded {len(new_docs)} chunks from PDF!</div>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<div class='info-msg'>ℹ️ This file is already loaded ({uploaded_pdf.name})</div>", unsafe_allow_html=True)
+# Check if website button was clicked FIRST (before processing uploads)
+website_button_clicked = False
+new_url = None
 
 with col2:
     st.markdown("### 🌐 Or Enter a Website")
-    
-    # Website URL
     url = st.text_input(
         "Enter website URL",
         placeholder="https://example.com",
@@ -225,34 +236,114 @@ with col2:
         key=f"url_input_{st.session_state.file_uploader_key}"
     )
     
-    if url and st.button("🔍 Load Website", key=f"load_btn_{st.session_state.file_uploader_key}"):
-        # Create unique identifier for URL
-        url_id = f"url_{url}"
+    if st.button("🔍 Load Website", key=f"load_btn_{st.session_state.file_uploader_key}"):
+        if url:
+            website_button_clicked = True
+            new_url = url
+
+# Process website BEFORE PDF to ensure it takes priority
+if website_button_clicked and new_url:
+    url_id = f"url_{new_url}"
+
+    # Always clear previous context when loading a new website
+    clear_all_context()
+    
+    with st.spinner("🌐 Fetching website content..."):
+        try:
+            st.session_state.docs = load_website(new_url)
+            st.session_state.current_source = url_id
+            st.session_state.last_processed_file = url_id
+            st.session_state.processing_complete = True
+            st.session_state.active_input_mode = "website"
+            st.session_state.file_uploader_key += 1  # reset PDF uploader state
+
+            # Force vector store rebuild
+            st.session_state.vector_store = None
+            st.session_state.qa_chain = None
+            st.session_state.retriever = None
+            
+            st.success(f"✅ Successfully loaded {len(st.session_state.docs)} chunks from website!")
+            st.rerun()
+        except Exception as e:
+            st.error(f"❌ Error loading website: {str(e)}")
+
+with col1:
+    st.markdown("### 📤 Upload Your Content")
+    
+    uploaded_pdf = st.file_uploader(
+        "Upload a PDF document",
+        type=["pdf"],
+        help="Select a PDF file to analyze",
+        key=f"pdf_uploader_{st.session_state.file_uploader_key}"
+    )
+    if uploaded_pdf and st.session_state.active_input_mode != "website":
+
+        # Create unique identifier for file
+        file_id = f"pdf_{uploaded_pdf.name}_{uploaded_pdf.size}"
         
-        if url_id not in st.session_state.processed_files:
-            with st.spinner("🌐 Fetching website content..."):
+        # CRITICAL: Only process if this file hasn't been processed yet
+        if file_id != st.session_state.last_processed_file:
+            # Clear previous context
+            clear_all_context()
+            
+            with st.spinner("📄 Processing PDF..."):
+                # Create unique temp filename to avoid conflicts
+                import time
+                temp_filename = f"temp_{int(time.time())}_{uploaded_pdf.name}"
+                
                 try:
-                    new_docs = load_website(url)
-                    st.session_state.docs.extend(new_docs)
-                    st.session_state.processed_files.add(url_id)
-                    # Reset vector store to force rebuild
+                    # Save the uploaded file
+                    with open(temp_filename, "wb") as f:
+                        f.write(uploaded_pdf.read())
+                    
+                    # Load and process the PDF
+                    st.session_state.docs = load_pdf(temp_filename)
+                    st.session_state.current_source = file_id
+                    st.session_state.last_processed_file = file_id
+                    st.session_state.processing_complete = True
+                    st.session_state.active_input_mode = "pdf"
+
+                    
+                    # Force vector store rebuild
                     st.session_state.vector_store = None
                     st.session_state.qa_chain = None
-                    st.markdown(f"<div class='success-msg'>✅ Successfully loaded {len(new_docs)} chunks from website!</div>", unsafe_allow_html=True)
+                    st.session_state.retriever = None
+                    
+                    # Clean up the temp file immediately after loading
+                    try:
+                        os.remove(temp_filename)
+                    except:
+                        pass  # Best effort cleanup
+                    
+                    st.success(f"✅ Successfully loaded {len(st.session_state.docs)} chunks from PDF!")
+                    st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Error loading website: {str(e)}")
-        else:
-            st.markdown(f"<div class='info-msg'>ℹ️ This URL is already loaded</div>", unsafe_allow_html=True)
+                    st.error(f"❌ Error processing PDF: {str(e)}")
+                    # Clean up on error
+                    try:
+                        if os.path.exists(temp_filename):
+                            os.remove(temp_filename)
+                    except:
+                        pass
 
 # Display document status
-if st.session_state.docs:
-    st.markdown("<div class='info-msg'>📚 <strong>Documents Loaded:</strong> {} text chunks ready for analysis</div>".format(len(st.session_state.docs)), unsafe_allow_html=True)
+if st.session_state.docs and st.session_state.current_source and st.session_state.processing_complete:
+    # Show current source with better formatting
+    if st.session_state.current_source.startswith("pdf_"):
+        source_parts = st.session_state.current_source.split("_", 1)[1].rsplit("_", 1)
+        source_display = f"📄 PDF: {source_parts[0]}"
+    elif st.session_state.current_source.startswith("url_"):
+        source_display = f"🌐 Website: {st.session_state.current_source[4:]}"
+    else:
+        source_display = "📚 Document"
     
-    # Create vector store and QA chain
+    st.markdown(f"<div class='info-msg'><strong>Current Source:</strong> {source_display}<br><strong>Chunks Loaded:</strong> {len(st.session_state.docs)} text chunks ready for analysis</div>", unsafe_allow_html=True)
+    
+    # Create vector store and QA chain ONLY if processing is complete
     if st.session_state.vector_store is None:
         with st.spinner("🔧 Building knowledge base..."):
             st.session_state.vector_store = create_vector_store(st.session_state.docs)
-            st.session_state.qa_chain,st.session_state.retriever = build_qa_chain(st.session_state.vector_store)
+            st.session_state.qa_chain, st.session_state.retriever = build_qa_chain(st.session_state.vector_store)
     
     # Divider
     st.markdown("---")
@@ -273,20 +364,11 @@ if st.session_state.docs:
     
     with col_clear:
         if st.button("🔄 Clear All", use_container_width=True):
-            # Clear all session state
-            st.session_state.docs = []
-            st.session_state.vector_store = None
-            st.session_state.qa_chain = None
+            # Clear all context
+            clear_all_context()
             
-            # Clear file uploader
-            if 'file_uploader_key' not in st.session_state:
-                st.session_state.file_uploader_key = 0
+            # Increment key to reset file uploader
             st.session_state.file_uploader_key += 1
-            
-            # Delete temp file if it exists
-            import os
-            if os.path.exists("temp.pdf"):
-                os.remove("temp.pdf")
             
             st.rerun()
     
@@ -296,7 +378,6 @@ if st.session_state.docs:
             
             # Display answer
             st.markdown("### 💡 Answer")
-            # answer_text = result["answer"]
             st.markdown(f"""
             <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                         padding: 1.5rem; 
