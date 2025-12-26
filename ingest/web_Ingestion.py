@@ -6,8 +6,8 @@ def load_website(url):
     docs = loader.load()
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=100
+        chunk_size=2000,
+        chunk_overlap=400
     )
 
     return splitter.split_documents(docs)

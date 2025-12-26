@@ -252,7 +252,7 @@ if st.session_state.docs:
     if st.session_state.vector_store is None:
         with st.spinner("🔧 Building knowledge base..."):
             st.session_state.vector_store = create_vector_store(st.session_state.docs)
-            st.session_state.qa_chain = build_qa_chain(st.session_state.vector_store)
+            st.session_state.qa_chain,st.session_state.retriever = build_qa_chain(st.session_state.vector_store)
     
     # Divider
     st.markdown("---")
@@ -292,11 +292,11 @@ if st.session_state.docs:
     
     if question and ask_button:
         with st.spinner("🤔 Thinking..."):
-            result = st.session_state.qa_chain.invoke({"input": question})
+            result = st.session_state.qa_chain.invoke(question)
             
             # Display answer
             st.markdown("### 💡 Answer")
-            answer_text = result["answer"]
+            # answer_text = result["answer"]
             st.markdown(f"""
             <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                         padding: 1.5rem; 
@@ -304,13 +304,14 @@ if st.session_state.docs:
                         color: white; 
                         font-size: 1.1rem;
                         line-height: 1.6;'>
-                {answer_text}
+                {result}
             </div>
             """, unsafe_allow_html=True)
             
             # Display sources
             st.markdown("### 📚 Sources")
-            sources = format_sources(result["context"])
+            source_docs = st.session_state.retriever.get_relevant_documents(question)
+            sources = format_sources(source_docs)
             
             for i, src in enumerate(sources, 1):
                 st.markdown(f"""

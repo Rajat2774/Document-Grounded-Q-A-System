@@ -1,50 +1,48 @@
 from langchain_groq import ChatGroq
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.prompts import PromptTemplate
-
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
 def build_qa_chain(vector_store):
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
-        api_key=os.getenv("GROQ_API_KEY"),
-        temperature=0
+        temperature=0,
+        max_tokens=512
     )
 
-    retriever = vector_store.as_retriever(
-        search_kwargs={"k": 6}
-    )
+    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
-    prompt_template = """
-Use the following pieces of context to answer the question.
-If the answer is present in the context, provide a detailed explanation.
-If the answer cannot be found, say:
+    prompt = PromptTemplate.from_template(
+        """
+You are a helpful assistant.
+
+Use ONLY the provided context to answer the question.
+If the answer is not present in the context, say:
 "I don't have enough information in the provided documents to answer this question."
 
 Context:
 {context}
 
 Question:
-{input}
+{question}
 
-Detailed Answer:
+Answer:
 """
-
-    prompt = PromptTemplate.from_template(prompt_template)
-
-    document_chain = create_stuff_documents_chain(
-        llm=llm,
-        prompt=prompt
     )
 
-    retrieval_chain = create_retrieval_chain(
-        retriever=retriever,
-        combine_docs_chain=document_chain
+    # LCEL pipeline (no deprecated imports)
+    rag_chain = (
+        {
+            "context": retriever,
+            "question": RunnablePassthrough()
+        }
+        | prompt
+        | llm
+        | StrOutputParser()
     )
 
-    return retrieval_chain
+    return rag_chain, retriever
