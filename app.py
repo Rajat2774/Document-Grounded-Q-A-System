@@ -310,7 +310,7 @@ if st.session_state.docs:
             
             # Display sources
             st.markdown("### 📚 Sources")
-            source_docs = st.session_state.retriever.get_relevant_documents(question)
+            source_docs = st.session_state.retriever.invoke(question)
             sources = format_sources(source_docs)
             
             for i, src in enumerate(sources, 1):
