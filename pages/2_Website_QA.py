@@ -25,7 +25,7 @@ st.markdown("""
     h1 {
         color: black !important;
         text-align: center;
-        font-size: 3.4rem;
+        font-size: 1.5rem;
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: -0.01em;

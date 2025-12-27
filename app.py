@@ -103,8 +103,8 @@ img {
 }
 
 .header-logo {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     object-fit: contain;
 }
 
