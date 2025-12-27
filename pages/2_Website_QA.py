@@ -22,14 +22,13 @@ st.markdown("""
         background: #fafafa;
         font-family: "Comic Neue", "Poppins", "Segoe UI", system-ui, sans-serif;
     }
-    h1 {
-        color: black !important;
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: -0.01em;
-        margin-bottom: 0.5rem;
+    h2 {
+        text-align:center;
+        font-size:1.5rem;
+        text-transform:uppercase;
+        letter-spacing:0.1em;
+        color:black !important;
+        margin-bottom:3rem;
     }
     .stButton > button {
     background: #ffdd57;
@@ -145,7 +144,7 @@ if 'web_retriever' not in st.session_state:
 if 'web_current_url' not in st.session_state:
     st.session_state.web_current_url = None
 
-st.markdown("<h1>🌐 Website Q&A System</h1>", unsafe_allow_html=True)
+st.markdown("<h2>🌐 Website Q&A System</h2>", unsafe_allow_html=True)
 
 # Back button
 if st.button("← Back to Home"):
