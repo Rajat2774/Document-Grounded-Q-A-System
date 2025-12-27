@@ -19,43 +19,19 @@ logo_base64 = get_base64_image("assets/Knowlens.png")
 
 st.markdown("""
 <style>
-    /* Hide default Streamlit UI */
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
 header { visibility: hidden; }
 
-div.block-container{padding-top:2rem;}
-/* Cartoon background */
-            
+div.block-container{padding-top:2rem;}    
 .stApp {
     background: #fafafa;
     font-family: "Comic Neue", "Poppins", "Segoe UI", system-ui, sans-serif;
 }
-
-/* Big friendly title */
-h1 {
-    color: black !important;
-    text-align: center;
-    font-size: 3.4rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5em;
-    margin-bottom: 0;
-}
-
-/* Subtitle */
-p {
-    color: black;
-    font-weight:bold;
-    font-size: 1.2rem;
-    text-align: center;
-}
-
-/* Cartoon card */
 .card {
     background: #ffffff;
     padding: 2.3rem 2rem;
-    border-radius: 0;          /* squarer card */
+    border-radius: 0;       
     border: 4px solid #000;
     box-shadow:
         8px 8px 0px #000,
@@ -65,46 +41,34 @@ p {
     transition: all 0.25s ease;
     position: relative;
 }
-
-
-/* Card hover bounce */
 .card:hover {
     transform: translate(-5px, -5px);
     box-shadow:
         14px 14px 0px #000,
         0 20px 44px rgba(0, 0, 0, 0.28);
 }
-
-
-/* Icons pop */
 .icon {
     font-size: 4.5rem;
     margin-bottom: 1rem;
     text-shadow:
         3px 3px 0px rgba(0, 0, 0, 0.35);
 }
-
-/* Card headings */
 .card h2 {
     font-size: 1.7rem;
     font-weight: 800;
     margin-bottom: 0.6rem;
 }
-
-/* Card text */
 .card p {
     color: #333;
     font-size: 1rem;
     line-height: 1.6;
 }
-
-/* Cartoon buttons */
 .stButton > button {
     background: #ffdd57;
-    color: black !important;                 /* high-contrast text */
+    color: black !important;                 
     border: 3px solid #000;
     padding: 0.75rem 2.2rem;
-    border-radius: 0;            /* squarer button */
+    border-radius: 0;           
     font-size: 1rem;
     font-weight: 800;
     letter-spacing: 0.02em;
@@ -112,16 +76,12 @@ p {
     transition: all 0.2s ease;
 }
 
-
-/* Button hover */
 .stButton > button:hover {
     background: #ffd000;
     transform: translate(-3px, -3px);
     box-shadow: 8px 8px 0px #000;
 }
 
-
-/* Button click */
 .stButton > button:active {
     transform: translate(2px, 2px);
     box-shadow: 3px 3px 0px #000;
@@ -131,13 +91,9 @@ p {
     font-size: 0.9rem;
     opacity: 0.9;
 }
-
-/* Remove rounding from images */
 img {
     border-radius: 0 !important;
 }
-
-/* Header layout */
 .header-row {
     display: flex;
     align-items: center;

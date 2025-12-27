@@ -34,10 +34,10 @@ st.markdown("""
     }
     .stButton > button {
     background: #ffdd57;
-    color: black !important;                 /* high-contrast text */
+    color: black !important;                
     border: 3px solid #000;
     padding: 0.75rem 2.2rem;
-    border-radius: 0;            /* squarer button */
+    border-radius: 0;       
     font-size: 1rem;
     font-weight: 800;
     letter-spacing: 0.02em;
@@ -45,16 +45,12 @@ st.markdown("""
     transition: all 0.2s ease;
 }
 
-
-/* Button hover */
 .stButton > button:hover {
     background: #ffd000;
     transform: translate(-3px, -3px);
     box-shadow: 8px 8px 0px #000;
 }
 
-
-/* Button click */
 .stButton > button:active {
     transform: translate(2px, 2px);
     box-shadow: 3px 3px 0px #000;
@@ -83,8 +79,6 @@ st.markdown("""
     .stSpinner > div {
         border-top-color: black !important;
     }
-    
-    /* Change spinner text color and style */
     .stSpinner > div > div {
         color: black !important;
         font-weight: 600;
@@ -109,14 +103,11 @@ st.markdown("""
     .stFileUploader section[data-testid="stFileUploaderDropzoneInstructions"] + div {
         color: black !important;
     }
-    
-    /* File name in the list */
     .stFileUploader [data-testid="stFileUploaderFileName"] {
         color: black !important;
         font-weight: 600 !important;
     }
     
-    /* File size text */
     .stFileUploader [data-testid="stFileUploaderFileSize"] {
         color: #666 !important;
     }
