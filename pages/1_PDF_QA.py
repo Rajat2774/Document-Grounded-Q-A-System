@@ -151,8 +151,8 @@ st.markdown('<hr style="border: 0; border-top: 2px solid black; margin: 20px 0; 
 # File uploader
 uploaded_pdf = st.file_uploader(
     "Upload a PDF document",
-    type=["pdf"],
-    help="Select a PDF file to analyze",
+    type=["pdf", "txt", "doc", "docx", "csv"],
+    help="Select a PDF, TXT, DOC, DOCX, or CSV file to analyze",
     key="pdf_uploader"
 )
 
@@ -180,6 +180,22 @@ if uploaded_pdf:
                 st.session_state.pdf_docs = load_pdf(temp_filename)
                 st.session_state.pdf_current_file = file_id
                 
+                if len(st.session_state.pdf_docs) == 0:
+                    st.error("❌ No text could be extracted from this document. This might be:")
+                    st.error("• A scanned PDF (image-based) - needs OCR")
+                    st.error("• An encrypted/protected PDF")
+                    st.error("• A corrupted file")
+                    st.info("💡 Try converting the PDF to a searchable format or use a text-based version.")
+                    
+                    # Clear the failed attempt
+                    st.session_state.pdf_docs = []
+                    st.session_state.pdf_current_file = None
+                    st.session_state.pdf_vector_store = None
+                    st.session_state.pdf_qa_chain = None
+                    st.session_state.pdf_retriever = None
+                else:
+                    # Success - set the current file
+                    st.session_state.pdf_current_file = file_id
                 # Vector store will be rebuilt in the next section
                 
                 # Cleanup temp file
