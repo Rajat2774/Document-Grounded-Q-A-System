@@ -288,5 +288,6 @@ Project Link: [https://github.com/Rajat2774/Document-Grounded-Q-A-System](Github
 - Implement proper access controls for multi-user scenarios
 
 ---
+Live Link: [https://knowlens.streamlit.app/](Knowlens)
 
 **Built with ❤️ using LangChain and Streamlit**
