@@ -251,9 +251,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-Rajat Singh - [https://x.com/RAJAT_073](X) -https://x.com/RAJAT_073 
+Rajat Singh - [X](https://x.com/RAJAT_073) 
 
-Project Link: [https://github.com/Rajat2774/Document-Grounded-Q-A-System](Github)
+Project Link: [Github](https://github.com/Rajat2774/Document-Grounded-Q-A-System)
 
 ## 🗺️ Roadmap
 
@@ -288,6 +288,6 @@ Project Link: [https://github.com/Rajat2774/Document-Grounded-Q-A-System](Github
 - Implement proper access controls for multi-user scenarios
 
 ---
-Live Link: [https://knowlens.streamlit.app/](Knowlens)
+Live Link: [Knowlens](https://knowlens.streamlit.app/)
 
 **Built with ❤️ using LangChain and Streamlit**
